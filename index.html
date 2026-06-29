@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- iOS Safari에서 16px 미만 폰트 줌 버그 방지 및 모바일 스케일 고정 추가 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🔮 Judge Club | 레트로 판단 다이어리</title>
+  <!-- 구글 폰트 로드: Bagel Fat One (Y2K 타이틀용), Pretendard (가독성 높은 본문용) -->
+  <link rel="stylesheet" as="style" crossorigin
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&display=swap" rel="stylesheet">
+  <!-- Lucide Icons (아이콘 라이브러리) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css?v=1.0.8">
+</head>
+
+<body>
+
+  <div class="app-container">
+    <!-- 배경 데코용 Y2K 팝 스티커들 (PC 화면용) -->
+    <div class="sticker-deco sticker-1">🍒</div>
+    <div class="sticker-deco sticker-2">⭐</div>
+    <div class="sticker-deco sticker-3">💖</div>
+    <div class="sticker-deco sticker-4">📟</div>
+    <div class="sticker-deco sticker-5">💊</div>
+    <div class="sticker-deco sticker-6">🌈</div>
+
+    <!-- 메인 다이어리 프레임 -->
+    <main class="diary-frame">
+
+      <!-- [좌측 페이지] 다이어리 커버 & Y2K 프로필 (PC 뷰 전용, 모바일에서는 헤더만 노출) -->
+      <div class="diary-left">
+        <header class="diary-header">
+          <h1 class="logo-title">🔮 Judge Club</h1>
+          <p class="logo-subtitle">나의 감을 믿는 힘, 차곡차곡 쌓이는 판단의 자기확신! 💖</p>
+        </header>
+
+        <div class="profile-sticker-zone">
+          <!-- 비주얼과 색상을 다이어리 스티커처럼 세련되게 업그레이드한 프로필 영역 -->
+          <div class="deco-profile sticker-shadow">
+            <div class="avatar">📒</div>
+            <div class="profile-info">
+              <div class="profile-name">MY DIARY</div>
+              <div class="profile-status">상태: 자기확신 레벨 업 중! ⚡</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 스프링 바인더 링 장식 (PC 뷰에서 좌우를 이어주는 링 효과) -->
+      <div class="diary-binder-rings">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+      </div>
+
+      <!-- [우측 페이지] 다이어리 속지 (탭, 콘텐트, 푸터) -->
+      <div class="diary-right">
+        <!-- 상단 3개 라운드 탭 버튼 -->
+        <nav class="diary-tabs">
+          <button class="tab-btn active" data-tab="tab-write" id="btn-tab-write">
+            <span class="tab-icon">✨</span> 일지적기
+          </button>
+          <button class="tab-btn" data-tab="tab-history" id="btn-tab-history">
+            <span class="tab-icon">📟</span> 히스토리
+          </button>
+          <button class="tab-btn" data-tab="tab-analysis" id="btn-tab-analysis">
+            <span class="tab-icon">💖</span> 분석룸
+          </button>
+        </nav>
+
+        <!-- 컨텐츠 영역 -->
+        <div class="diary-content">
+
+          <!-- [탭 1] 일지적기 -->
+          <section id="tab-write" class="tab-section active">
+            <!-- 일지 작성 폼 -->
+            <form id="diary-form" class="sticker-shadow">
+              <!-- 날짜 선택 -->
+              <div class="form-group">
+                <label for="input-date" class="form-label">📅 날짜</label>
+                <div class="input-container">
+                  <input type="date" id="input-date" class="form-input" required>
+                </div>
+              </div>
+
+              <!-- 카테고리 캡슐 -->
+              <div class="form-group">
+                <span class="form-label">🏷️ 카테고리</span>
+                <div class="category-capsules">
+                  <button type="button" class="capsule-btn" data-category="money">💰 돈</button>
+                  <button type="button" class="capsule-btn" data-category="people">👥 사람</button>
+                  <button type="button" class="capsule-btn" data-category="career">💼 커리어</button>
+                  <button type="button" class="capsule-btn" data-category="health">💊 건강</button>
+                  <button type="button" class="capsule-btn" data-category="daily">🍿 일상</button>
+                  <button type="button" class="capsule-btn" data-category="etc">🎨 기타</button>
+                </div>
+              </div>
+
+              <!-- 카테고리별 동적 설명 가이드 박스 -->
+              <div class="live-guide-box" id="live-guide-box">
+                <span class="live-guide-icon">💡</span>
+                <span class="live-guide-text" id="live-guide-text">카테고리를 누르면 설명이 여기에 나타나!</span>
+              </div>
+
+              <!-- 내 판단 (한 줄 텍스트) -->
+              <div class="form-group">
+                <label for="input-judgment" class="form-label">🔮 내 판단 (한 줄)</label>
+                <input type="text" id="input-judgment" class="form-input" placeholder="예: 오늘 야식을 먹으면 내일 무조건 후회할 것이다"
+                  maxlength="50" required>
+              </div>
+
+              <!-- 생각한 이유 (한 줄 텍스트) -->
+              <div class="form-group">
+                <label for="input-reason" class="form-label">🧐 그렇게 생각한 이유</label>
+                <input type="text" id="input-reason" class="form-input" placeholder="예: 최근 야식을 먹고 잔 날마다 속이 너무 쓰렸음"
+                  maxlength="100" required>
+              </div>
+
+              <!-- 저장하기 버튼 -->
+              <button type="submit" class="submit-btn sticker-shadow">
+                💾 저장하기! 🔮
+              </button>
+            </form>
+          </section>
+
+          <!-- [탭 2] 히스토리 -->
+          <section id="tab-history" class="tab-section">
+            <!-- 필터 구조 -->
+            <div class="filter-chips">
+              <button class="filter-chip active" data-filter="all">🌟<span class="chip-text"> 전체</span></button>
+              <button class="filter-chip" data-filter="week">📆<span class="chip-text"> 최근 일주일</span></button>
+              <button class="filter-chip" data-filter="month">📅<span class="chip-text"> 이번 달</span></button>
+              <button class="filter-chip" data-filter="pending">⏳<span class="chip-text"> 결과 미입력</span></button>
+            </div>
+
+            <!-- 커스텀 기간 설정 필터 -->
+            <div class="custom-period-filter sticker-shadow">
+              <span class="period-label">📅 커스텀 기간 필터</span>
+              <div class="period-inputs">
+                <input type="date" id="filter-start-date" class="period-input">
+                <span class="period-dash">~</span>
+                <input type="date" id="filter-end-date" class="period-input">
+                <button type="button" class="btn-period-apply" id="btn-period-apply">적용 🔍</button>
+                <button type="button" class="btn-period-reset" id="btn-period-reset">리셋 🔄</button>
+              </div>
+            </div>
+
+            <!-- 로그 리스트 -->
+            <div class="history-list" id="history-list">
+              <!-- 동적으로 카드가 렌더링되는 영역 -->
+            </div>
+          </section>
+
+          <!-- [탭 3] 분석룸 -->
+          <section id="tab-analysis" class="tab-section">
+            <!-- 분석 리포트 카드 -->
+            <div class="analysis-card sticker-shadow">
+
+              <!-- 적중률 도넛/하트 게이지 -->
+              <div class="accuracy-section">
+                <div class="heart-gauge-container">
+                  <div class="heart-icon-bg">💖</div>
+                  <div class="accuracy-circle">
+                    <span class="accuracy-num" id="accuracy-value">0%</span>
+                    <span class="accuracy-label">판단 적중률</span>
+                  </div>
+                </div>
+                <p class="accuracy-desc">피드백 완료된 총 <span id="feedback-count">0</span>건 중 <span
+                    id="correct-count">0</span>건 성공!</p>
+              </div>
+
+              <div class="divider"></div>
+
+              <!-- 최고 분야 / 취약 요인 매칭 -->
+              <div class="stats-summary-grid">
+                <div class="stat-box best-box sticker-shadow">
+                  <span class="stat-emoji">🏆</span>
+                  <div class="stat-info">
+                    <span class="stat-title">최고 적중 분야</span>
+                    <span class="stat-value" id="best-category">데이터 없음</span>
+                  </div>
+                </div>
+                <div class="stat-box worst-box sticker-shadow">
+                  <span class="stat-emoji">🚨</span>
+                  <div class="stat-info">
+                    <span class="stat-title">가장 잦은 오류 요인</span>
+                    <span class="stat-value" id="worst-reason">데이터 없음</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 📊 시각화 차트 영역 (미니 탭 구조 적용) -->
+              <div class="analysis-graphs">
+                <!-- 그래프 서브 탭 -->
+                <div class="graph-tabs">
+                  <button type="button" class="graph-tab-btn active" data-graph-tab="graph-accuracy">🏆 적중 분야</button>
+                  <button type="button" class="graph-tab-btn" data-graph-tab="graph-cause">🚨 오답 요인</button>
+                </div>
+
+                <div class="graph-section graph-tab-content active" id="graph-accuracy">
+                  <h4 class="graph-title">🏆 카테고리별 적중률 랭킹</h4>
+                  <div class="graph-container" id="category-accuracy-bars">
+                    <!-- JS에서 렌더링 -->
+                  </div>
+                </div>
+
+                <div class="graph-section graph-tab-content" id="graph-cause">
+                  <h4 class="graph-title">🚨 오답 원인 분석 리포트</h4>
+                  <div class="graph-container" id="error-cause-bars">
+                    <!-- JS에서 렌더링 -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- 알고리즘 기반 텍스트 피드백 -->
+              <div class="feedback-guideline-box">
+                <h3 class="guideline-header">🔮 2026년 버추얼 카운슬러의 조언</h3>
+                <p class="guideline-text" id="guideline-content">
+                  판단을 조금 더 기록하고 결과를 알려주면, 너의 완벽한 2026년 라이프를 위한 카운슬링을 시작할게! ✨
+                </p>
+              </div>
+
+              <!-- 실제 통계 vs 예시 통계 구분을 위한 가이드 메시지 -->
+              <div class="example-notice-box">
+                * 💡 온보딩을 위한 예시 카드는 위 통계 및 조언 분석에서 자동으로 제외되어, 오직 당신의 리얼 인생 기록만 안전하게 분석됩니다!
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- 우측 푸터 (데이터 동기화 및 백업) -->
+        <footer class="diary-footer">
+          <div class="sync-actions">
+            <button type="button" class="footer-action-btn" id="btn-telepathy">
+              <span class="btn-icon">🔮</span> 텔레파시 동기화
+            </button>
+            <button type="button" class="footer-action-btn" id="btn-export-json">
+              <span class="btn-icon">📥</span> 내보내기
+            </button>
+            <button type="button" class="footer-action-btn" id="btn-import-json">
+              <span class="btn-icon">📤</span> 불러오기
+            </button>
+            <input type="file" id="json-file-input" accept=".json" style="display: none;">
+          </div>
+          <p class="footer-cr">© 2026 Retro Judgment Diary. All rights reserved.</p>
+        </footer>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- 저장 완료 팝업 (토스트) -->
+  <div class="toast-popup" id="save-toast">
+    판단 완료! 🔮
+  </div>
+
+  <!-- 🔮 텔레파시 동기화 모달 -->
+  <div class="modal-overlay" id="sync-modal">
+    <div class="modal-content sticker-shadow">
+      <div class="modal-header">
+        <h2 class="modal-title">🔮 텔레파시 동기화</h2>
+        <button class="modal-close-btn" id="btn-close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          모바일과 PC 등 서로 다른 기기 간에 데이터를 실시간으로 주고받을 수 있는 마법 같은 텔레파시 동기화입니다!
+        </p>
+
+        <!-- 💡 텔레파시 동기화 사용법 -->
+        <div class="sync-tutorial-card sticker-shadow">
+          <span class="tutorial-badge">💡 기기간 동기화 초간단 사용법</span>
+          <ul class="tutorial-steps">
+            <li>1️⃣ 모바일(스마트폰)로 일지를 편하게 적는다.</li>
+            <li>2️⃣ 모바일에서 <strong>[클라우드에 쏘기 ☁️]</strong>를 누른다.</li>
+            <li>3️⃣ PC나 태블릿 등 다른 기기에서 브라우저를 켠다.</li>
+            <li>4️⃣ 해당 기기에서 <strong>[클라우드에서 가져오기 ⚡]</strong>를 누르면 연동 끝!</li>
+          </ul>
+        </div>
+
+        <!-- 내 기기 동기화 코드 -->
+        <div class="sync-code-section sticker-shadow">
+          <span class="sync-label">🔑 내 동기화 코드</span>
+          <div class="code-copy-row">
+            <input type="text" id="my-sync-code" class="code-input" readonly>
+            <button class="btn-copy-code" id="btn-copy-code">복사 📋</button>
+          </div>
+        </div>
+
+        <!-- 클라우드 연동 액션 -->
+        <div class="sync-buttons-row">
+          <button class="sync-btn-main btn-push sticker-shadow" id="btn-sync-push">
+            ☁️ 현재 데이터를 클라우드에 쏘기
+          </button>
+          <button class="sync-btn-main btn-pull sticker-shadow" id="btn-sync-pull">
+            ⚡ 클라우드에서 데이터 가져오기
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 동기화 코드 불러오기 -->
+        <div class="form-group" style="margin-top: 15px;">
+          <label for="target-sync-code" class="form-label" style="font-size: 13px;">🔗 다른 기기의 코드로 연결하기</label>
+          <div class="code-input-row">
+            <input type="text" id="target-sync-code" class="form-input" placeholder="Y2K-XXXX-XXXX 형식 입력">
+            <button class="btn-link-code sticker-shadow" id="btn-link-code">코드 적용</button>
+          </div>
+          <span class="sync-info-text">* 코드를 바꾸면 해당 코드의 클라우드 데이터와 연동됩니다.</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ✏️ 일지 수정 모달 -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal-content sticker-shadow">
+      <div class="modal-header">
+        <h2 class="modal-title">✏️ 판단 수정하기</h2>
+        <button class="modal-close-btn" id="btn-close-edit-modal">&times;</button>
+      </div>
+      <form id="edit-form" class="modal-body">
+        <input type="hidden" id="edit-log-id">
+
+        <div class="form-group">
+          <label for="edit-date" class="form-label">📅 날짜</label>
+          <input type="date" id="edit-date" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">🏷️ 카테고리</span>
+          <div class="category-capsules" id="edit-category-capsules">
+            <button type="button" class="capsule-btn" data-edit-category="money">💰 돈</button>
+            <button type="button" class="capsule-btn" data-edit-category="people">👥 사람</button>
+            <button type="button" class="capsule-btn" data-edit-category="career">💼 커리어</button>
+            <button type="button" class="capsule-btn" data-edit-category="health">💊 건강</button>
+            <button type="button" class="capsule-btn" data-edit-category="daily">🍿 일상</button>
+            <button type="button" class="capsule-btn" data-edit-category="etc">🎨 기타</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-judgment" class="form-label">🔮 내 판단 (한 줄)</label>
+          <input type="text" id="edit-judgment" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-reason" class="form-label">🧐 그렇게 생각한 이유</label>
+          <input type="text" id="edit-reason" class="form-input" required>
+        </div>
+
+        <!-- 피드백 수정 필드 (이미 피드백이 등록된 카드인 경우 활성화) -->
+        <div id="edit-feedback-fields"
+          style="border-top: 1.5px dashed var(--text-dark); padding-top: 12px; margin-top: 12px;">
+          <div class="form-group">
+            <span class="form-label">⭕/❌ 결과 피드백</span>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="feedback-btn" id="edit-btn-correct" style="flex:1;">⭕ 맞음</button>
+              <button type="button" class="feedback-btn" id="edit-btn-incorrect" style="flex:1;">❌ 틀림</button>
+            </div>
+          </div>
+
+          <!-- 🤔 이모지로 변경하여 중복 방지 -->
+          <div class="form-group" id="edit-cause-group" style="display: none;">
+            <label for="edit-error-cause" class="form-label">🤔 왜 틀렸을까?</label>
+            <select id="edit-error-cause" class="form-input">
+              <option value="impulse">⚡ 조급·충동</option>
+              <option value="brain">🧠 뇌피셜</option>
+              <option value="lack">🔍 정보부족</option>
+              <option value="ears">👥 귀가얇음</option>
+              <option value="lazy">🛌 귀찮음</option>
+              <option value="luck">🎲 그냥운</option>
+              <option value="etc">🎨 기타</option>
+            </select>
+          </div>
+
+          <!-- 복기 메모 대신 '리얼 한 줄 코멘트' 워딩으로 교체 -->
+          <div class="form-group">
+            <label for="edit-memo" class="form-label">📝 리얼 한 줄 코멘트</label>
+            <input type="text" id="edit-memo" class="form-input" placeholder="실제 겪어보니 어땠는지 코멘트를 적어줘...">
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn sticker-shadow" style="margin-top: 14px;">
+          💾 수정완료! 🔮
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js?v=1.0.8"></script>
+</body>
+
+</html>
