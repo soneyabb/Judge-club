@@ -502,6 +502,7 @@ function saveDiary() {
   }
 
   initDateInput();
+  refreshUI();
 }
 
 // 토스트 팝업 띄우기
