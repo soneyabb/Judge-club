@@ -26,7 +26,9 @@ if (IS_DEV_ENV) {
 }
 
 // 무료 임시 NoSQL 키-밸류 저장소 버킷 ID (kvdb.io 공용 버킷)
-const KVDB_BUCKET = 'j5zM5f8n8vD6M3oP4h7q2Z';
+// 문자열 분할로 봇의 자동 수집 방지
+const KVDB_BUCKET_PARTS = ['SBg', '5FU', '8VD', '9tY', 'XfA', 'aJJ', 'FvB', '8'];
+const KVDB_BUCKET = KVDB_BUCKET_PARTS.join('');
 const KVDB_BASE_URL = `https://kvdb.io/${KVDB_BUCKET}/`;
 
 // 카테고리 텍스트 및 상세 매칭 가이드 매핑 (초간결 한 줄 멘트로 교체하여 줄바꿈 최소화)
@@ -116,16 +118,26 @@ function initSyncCode() {
   }
 }
 
-// 8자리 코드 생성 헬퍼
+// 8자리 코드 생성 헬퍼 (crypto.getRandomValues 사용으로 안전성 강화)
 function generateRandomSyncCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const array = new Uint32Array(8);
+  crypto.getRandomValues(array);
   let p1 = '';
   let p2 = '';
   for (let i = 0; i < 4; i++) {
-    p1 += chars.charAt(Math.floor(Math.random() * chars.length));
-    p2 += chars.charAt(Math.floor(Math.random() * chars.length));
+    p1 += chars.charAt(array[i] % chars.length);
+    p2 += chars.charAt(array[i + 4] % chars.length);
   }
   return `Y2K-${p1}-${p2}`;
+}
+
+// 동기화 코드 해시 함수 (SHA-256)
+async function hashSyncCode(code) {
+  const encoded = new TextEncoder().encode(code);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 40);
 }
 
 // 예시(온보딩) 데이터 버전. 예시 카드 내용을 수정할 때마다 이 값을 올리면
@@ -1157,58 +1169,59 @@ function applyTargetSyncCode() {
 }
 
 // 5. 🔮 텔레파시 동기화 - 데이터 클라우드에 쏘기 (Push)
-function pushToCloud() {
+async function pushToCloud() {
   const pushBtn = document.getElementById('btn-sync-push');
   const originalText = pushBtn.textContent;
 
   pushBtn.textContent = '🔮 텔레파시 전송 중...';
   pushBtn.disabled = true;
 
-  fetch(`${KVDB_BASE_URL}${state.syncCode}`, {
-    method: 'POST',
-    body: JSON.stringify(state.logs),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-    .then(res => {
-      if (res.ok) {
-        alert(`🔮 텔레파시 전송 성공!\n현재 데이터가 클라우드에 안전하게 보관되었어. 다른 기기에서 [클라우드에서 데이터 가져오기]를 눌러봐!`);
-      } else {
-        throw new Error('네트워크 응답 오류');
+  try {
+    const hashedKey = await hashSyncCode(state.syncCode);
+    const res = await fetch(`${KVDB_BASE_URL}${hashedKey}`, {
+      method: 'POST',
+      body: JSON.stringify(state.logs),
+      headers: {
+        'Content-Type': 'application/json'
       }
-    })
-    .catch(err => {
-      alert('🔮 텔레파시 전송 실패 ㅠㅠ 인터넷 연결 상태를 확인하고 다시 시도해줘! 💥');
-      console.error(err);
-    })
-    .finally(() => {
-      pushBtn.textContent = originalText;
-      pushBtn.disabled = false;
     });
+
+    if (res.ok) {
+      alert(`🔮 텔레파시 전송 성공!\n현재 데이터가 클라우드에 안전하게 보관되었어. 다른 기기에서 [클라우드에서 데이터 가져오기]를 눌러봐!`);
+    } else {
+      throw new Error('네트워크 응답 오류');
+    }
+  } catch (err) {
+    alert('🔮 텔레파시 전송 실패 ㅠㅠ 인터넷 연결 상태를 확인하고 다시 시도해줘! 💥');
+    console.error(err);
+  } finally {
+    pushBtn.textContent = originalText;
+    pushBtn.disabled = false;
+  }
 }
 
 // 6. 🔮 텔레파시 동기화 - 클라우드에서 가져오기 (Pull)
-function pullFromCloud() {
+async function pullFromCloud() {
   const pullBtn = document.getElementById('btn-sync-pull');
   const originalText = pullBtn.textContent;
 
   pullBtn.textContent = '⚡ 텔레파시 받는 중...';
   pullBtn.disabled = true;
 
-  fetch(`${KVDB_BASE_URL}${state.syncCode}`)
-    .then(res => {
-      if (res.status === 404) {
-        alert('클라우드에 저장된 텔레파시 데이터가 아직 없어! 기기에서 먼저 [현재 데이터를 클라우드에 쏘기]를 완료해줘! ☁️');
-        return null;
-      }
-      if (!res.ok) {
-        throw new Error('데이터 응답 오류');
-      }
-      return res.json();
-    })
-    .then(cloudLogs => {
-      if (!cloudLogs) return;
+  try {
+    const hashedKey = await hashSyncCode(state.syncCode);
+    const res = await fetch(`${KVDB_BASE_URL}${hashedKey}`);
+    
+    if (res.status === 404) {
+      alert('클라우드에 저장된 텔레파시 데이터가 아직 없어! 기기에서 먼저 [현재 데이터를 클라우드에 쏘기]를 완료해줘! ☁️');
+      return;
+    }
+    if (!res.ok) {
+      throw new Error('데이터 응답 오류');
+    }
+    
+    const cloudLogs = await res.json();
+    if (!cloudLogs) return;
 
       if (Array.isArray(cloudLogs)) {
         const localIds = new Set(state.logs.map(log => log.id));
@@ -1248,13 +1261,11 @@ function pullFromCloud() {
       } else {
         alert('가져온 텔레파시 데이터 형태가 올바르지 않아! 🥺');
       }
-    })
-    .catch(err => {
-      alert('⚡ 텔레파시 수신 실패 ㅠㅠ 다시 시도해줘! 💥');
-      console.error(err);
-    })
-    .finally(() => {
-      pullBtn.textContent = originalText;
-      pullBtn.disabled = false;
-    });
+  } catch (err) {
+    alert('⚡ 텔레파시 수신 실패 ㅠㅠ 다시 시도해줘! 💥');
+    console.error(err);
+  } finally {
+    pullBtn.textContent = originalText;
+    pullBtn.disabled = false;
+  }
 }
