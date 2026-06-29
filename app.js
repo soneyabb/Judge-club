@@ -118,18 +118,20 @@ function initSyncCode() {
   }
 }
 
-// 8자리 코드 생성 헬퍼 (crypto.getRandomValues 사용으로 안전성 강화)
+// 8자리 코드 생성 헬퍼 (충돌 방지를 위해 12자리 Y2K-XXXX-XXXX-XXXX로 보안 강화)
 function generateRandomSyncCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const array = new Uint32Array(8);
+  const array = new Uint32Array(12);
   crypto.getRandomValues(array);
   let p1 = '';
   let p2 = '';
+  let p3 = '';
   for (let i = 0; i < 4; i++) {
     p1 += chars.charAt(array[i] % chars.length);
     p2 += chars.charAt(array[i + 4] % chars.length);
+    p3 += chars.charAt(array[i + 8] % chars.length);
   }
-  return `Y2K-${p1}-${p2}`;
+  return `Y2K-${p1}-${p2}-${p3}`;
 }
 
 // 동기화 코드 해시 함수 (SHA-256)
@@ -1159,12 +1161,12 @@ function applyTargetSyncCode() {
   const codeVal = targetInput ? targetInput.value.trim().toUpperCase() : '';
 
   if (!codeVal) {
-    alert('연결할 8자리 동기화 코드를 정확히 입력해줘! 🥺');
+    alert('연결할 12자리 동기화 코드를 정확히 입력해줘! 🥺');
     return;
   }
 
-  if (!/^Y2K-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(codeVal)) {
-    alert('코드 형식이 올바르지 않아!\n(예시 형식: Y2K-A1B2-C3D4)');
+  if (!/^Y2K-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(codeVal)) {
+    alert('코드 형식이 올바르지 않아!\n(예시 형식: Y2K-A1B2-C3D4-E5F6)');
     return;
   }
 
