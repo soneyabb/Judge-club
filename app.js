@@ -330,6 +330,23 @@ function setupEventListeners() {
     copyCodeBtn.addEventListener('click', copySyncCode);
   }
 
+  // 8-1. 동기화 코드 새로 발급
+  const regenCodeBtn = document.getElementById('btn-regen-code');
+  if (regenCodeBtn) {
+    regenCodeBtn.addEventListener('click', () => {
+      if (confirm('동기화 코드를 새로 발급할까?\n(기존 코드로 업로드한 데이터는 새 버킷 규칙과 해싱 강화 정책에 따라 연동되지 않고 새 코드를 기준으로 동기화가 진행됩니다.)')) {
+        const newCode = generateRandomSyncCode();
+        localStorage.setItem(SYNC_CODE_STORAGE_KEY, newCode);
+        state.syncCode = newCode;
+        const myCodeEl = document.getElementById('my-sync-code');
+        if (myCodeEl) {
+          myCodeEl.value = newCode;
+        }
+        alert(`🔑 새 동기화 코드 발급 완료!\n[${newCode}]`);
+      }
+    });
+  }
+
   // 9. 클라우드 쏘기 (Push)
   const pushBtn = document.getElementById('btn-sync-push');
   if (pushBtn) {
